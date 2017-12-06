@@ -19,7 +19,7 @@ app.set('port', process.env.PORT || 3000);
 //#region webhook router
 router.route('/')
     .post((req, res, next) => {
-        console.log('request body from jira: %j', req.body);
+        console.log('request body from jira: %j', JSON.stringify(req.body));
         return res.status(httpStatus.OK);
     })
 //#endregion
