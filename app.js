@@ -33,12 +33,20 @@ webHookRouter.route('/')
 //#endregion
 
 //#region jira connector route
-jiraRouter.route('/')
+jiraRouter.route('/authorize')
     .post(async (req, res, next) => {
         try {
             let oauth = await promiseGetAuthorizeURL({ host: req.body.hostName, oauth: { consumer_key: req.body.consumer_key, private_key: await promiseReadFile('./jira.pem', 'utf8') } });
-            console.log(`oauth:`, oauth);
-            let accessToken = await promiseSwapToken({ host: req.body.hostName, oauth: { token: oauth.token, token_secret: oauth.token_secret, oauth_verifier: req.body.oauth_verifier, consumer_key: req.body.consumer_key, private_key: await promiseReadFile('./jira.pem', 'utf8') } })
+            res.status(httpStatus.OK).json({ message: `Successfully retrived authorize code`, oauth: oauth });
+        } catch (err) {
+            next(err);
+        }
+    });
+
+jiraRouter.route('/access_token')
+    .post(async (req, res, next) => {
+        try {
+            let accessToken = await promiseSwapToken({ host: req.body.hostName, oauth: { token: req.body.token, token_secret: req.body.token_secret, oauth_verifier: req.body.oauth_verifier, consumer_key: req.body.consumer_key, private_key: await promiseReadFile('./jira.pem', 'utf8') } })
             console.log(`access_token:`, accessToken);
             let jira = JiraClient({ host: req.body.hostName, oauth: { token: accessToken.access_token, token_secret: oauth.token_secret, consumer_key: req.body.consumer_key, private_key: await promiseReadFile('./jira.pem', 'utf8') } });
             console.log(`jira:`, jira);
