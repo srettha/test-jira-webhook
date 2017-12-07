@@ -10,6 +10,7 @@ const httpStatus = require('http-status');
 const bodyParser = require('body-parser');
 const JiraClient = require('jira-connector');
 
+const promiseReadFile = promisify(fs.readFile);
 const promiseGetAuthorizeURL = promisify(JiraClient.oauth_util.getAuthorizeURL);
 const promiseSwapToken = promisify(JiraClient.oauth_util.swapRequestTokenWithAccessToken);
 
@@ -33,13 +34,13 @@ webHookRouter.route('/')
 
 //#region jira connector route
 jiraRouter.route('/')
-    .post((req, res, next) => {
+    .post(async (req, res, next) => {
         try {
-            let oauth = await promiseGetAuthorizeURL({ host: req.body.hostName, oauth: { consumer_key: req.body.consumer_key, private_key: fs.readFileSync('jira.pem', 'utf8') } });
+            let oauth = await promiseGetAuthorizeURL({ host: req.body.hostName, oauth: { consumer_key: req.body.consumer_key, private_key: await promiseReadFile('./jira.pem', 'utf8') } });
             console.log(`oauth: ${oauth}`);
-            let accessToken = await promiseSwapToken({ host: req.body.hostName, oauth: { token: oauth.token, token_secret: oauth.token_secret, oauth_verifier: oauth.oauth_verifier, consumer_key: req.body.consumer_key, private_key: fs.readFileSync('jira.pem', 'utf8') } })
+            let accessToken = await promiseSwapToken({ host: req.body.hostName, oauth: { token: oauth.token, token_secret: oauth.token_secret, oauth_verifier: oauth.oauth_verifier, consumer_key: req.body.consumer_key, private_key: await promiseReadFile('./jira.pem', 'utf8') } })
             console.log(`access_token: ${accessToken}`);
-            let jira = JiraClient({ host: req.body.hostName, oauth: { token: accessToken.access_token, token_secret: oauth.token_secret, consumer_key: req.body.consumer_key, private_key: fs.readFileSync('jira.pem', 'utf8') } });
+            let jira = JiraClient({ host: req.body.hostName, oauth: { token: accessToken.access_token, token_secret: oauth.token_secret, consumer_key: req.body.consumer_key, private_key: await promiseReadFile('./jira.pem', 'utf8') } });
             console.log(`jira: ${jira}`);
         } catch (err) {
             next(err);
