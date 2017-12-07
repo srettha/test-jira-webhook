@@ -48,7 +48,7 @@ jiraRouter.route('/access_token')
         try {
             let accessToken = await promiseSwapToken({ host: req.body.hostName, oauth: { token: req.body.token, token_secret: req.body.token_secret, oauth_verifier: req.body.oauth_verifier, consumer_key: req.body.consumer_key, private_key: await promiseReadFile('./jira.pem', 'utf8') } })
             console.log(`access_token:`, accessToken);
-            let jira = JiraClient({ host: req.body.hostName, oauth: { token: accessToken.access_token, token_secret: oauth.token_secret, consumer_key: req.body.consumer_key, private_key: await promiseReadFile('./jira.pem', 'utf8') } });
+            let jira = JiraClient({ host: req.body.hostName, oauth: { token: accessToken.access_token, token_secret: req.body.token_secret, consumer_key: req.body.consumer_key, private_key: await promiseReadFile('./jira.pem', 'utf8') } });
             console.log(`jira:`, jira);
         } catch (err) {
             next(err);
