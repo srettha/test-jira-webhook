@@ -37,11 +37,11 @@ jiraRouter.route('/')
     .post(async (req, res, next) => {
         try {
             let oauth = await promiseGetAuthorizeURL({ host: req.body.hostName, oauth: { consumer_key: req.body.consumer_key, private_key: await promiseReadFile('./jira.pem', 'utf8') } });
-            console.log(`oauth: ${oauth}`);
+            console.log(`oauth:`, oauth);
             let accessToken = await promiseSwapToken({ host: req.body.hostName, oauth: { token: oauth.token, token_secret: oauth.token_secret, oauth_verifier: oauth.oauth_verifier, consumer_key: req.body.consumer_key, private_key: await promiseReadFile('./jira.pem', 'utf8') } })
-            console.log(`access_token: ${accessToken}`);
+            console.log(`access_token:`, accessToken);
             let jira = JiraClient({ host: req.body.hostName, oauth: { token: accessToken.access_token, token_secret: oauth.token_secret, consumer_key: req.body.consumer_key, private_key: await promiseReadFile('./jira.pem', 'utf8') } });
-            console.log(`jira: ${jira}`);
+            console.log(`jira:`, jira);
         } catch (err) {
             next(err);
         }
